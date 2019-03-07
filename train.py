@@ -246,9 +246,9 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
                           momentum=0.9,
                           weight_decay=0.001)
 
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
-                                               milestones=[10],
-                                               gamma=0.1)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1,
+                                                     min_lr=1e-5,
+                                                     patience=10)
     metrics = {
         'train': pd.DataFrame(columns=['epoch', 'loss', 'acc', 'auc']),
         'val': pd.DataFrame(columns=['epoch', 'loss', 'acc', 'auc'])
@@ -280,7 +280,7 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
         print('val', epoch_val_result)
         print('-' * 40)
 
-        scheduler.step()
+        scheduler.step(epoch_val_result['loss'])
 
         if epoch_val_result['auc'] > best_val_auc:
             best_val_auc = epoch_val_result['auc']
