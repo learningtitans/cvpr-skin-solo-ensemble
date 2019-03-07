@@ -121,7 +121,8 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
          test_samples, early_stopping_patience, limit_data, images_per_epoch,
          _run):
     assert(model_name in ('inceptionv4', 'resnet152', 'densenet161',
-                          'senet154'))
+                          'senet154', 'pnasnet5large', 'xception',
+                          'squeezenet', 'resnext', 'dpn'))
 
     AUGMENTED_IMAGES_DIR = os.path.join(fs_observer.dir, 'images')
     CHECKPOINTS_DIR = os.path.join(fs_observer.dir, 'checkpoints')
@@ -156,6 +157,44 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
         aug['std'] = [0.229, 0.224, 0.225]
     elif model_name == 'senet154':
         model = ptm.senet154(num_classes=1000, pretrained='imagenet')
+        model.last_linear = nn.Linear(model.last_linear.in_features, 2)
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'squeezenet':
+        model = ptm.squeezenet1_1(num_classes=1000, pretrained='imagenet')
+        model.last_conv = nn.Conv2d(
+            512, 2, kernel_size=(1, 1), stride=(1, 1))
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'pnasnet5large':
+        model = ptm.pnasnet5large(num_classes=1000, pretrained='imagenet')
+        model.last_linear = nn.Linear(model.last_linear.in_features, 2)
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'nasnetalarge':
+        model = ptm.nasnetalarge(num_classes=1000, pretrained='imagenet')
+        model.last_linear = nn.Linear(model.last_linear.in_features, 2)
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'xception':
+        model = ptm.xception(num_classes=1000, pretrained='imagenet')
+        model.last_linear = nn.Linear(model.last_linear.in_features, 2)
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'dpn':
+        model = ptm.dpn131(num_classes=1000, pretrained='imagenet')
+        model.last_linear = nn.Conv2d(model.last_linear.in_channels, 2,
+                                      kernel_size=1, bias=True)
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'resnext':
+        model = ptm.resnext101_64x4d(num_classes=1000, pretrained='imagenet')
         model.last_linear = nn.Linear(model.last_linear.in_features, 2)
         aug['size'] = model.input_size[1]
         aug['mean'] = model.mean
