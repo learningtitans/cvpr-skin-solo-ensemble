@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.metrics import (roc_auc_score, accuracy_score,
-                             average_precision_score)
+                             average_precision_score, confusion_matrix,
+                             )
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -78,6 +79,11 @@ def test_with_augmentation(model, dataset, device, num_workers, n,
     acc = accuracy_score(
         labels_array, np.where(scores_array >= 0.5, 1, 0))
     avp = average_precision_score(labels_array, scores_array)
+    conf_matrix = confusion_matrix(labels_array, scores_array >= 0.5)
+    tn, fp, fn, tp = conf_matrix.ravel()
+    specificity = tn / (tn+fp)
+    sensitivity = tp / (tp+fn)
 
-    return ({'loss': losses.avg, 'auc': auc, 'acc': acc, 'avp': avp},
+    return ({'loss': losses.avg, 'auc': auc, 'acc': acc, 'avp': avp,
+             'spec': specificity, 'sens': sensitivity, 'cm': conf_matrix},
             predictions)

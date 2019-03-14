@@ -306,27 +306,66 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
                               index=False)
 
     # Run testing
-    test_result, _ = test_with_augmentation(
+    # TODO: reduce code repetition
+    test_result, preds = test_with_augmentation(
         torch.load(BEST_MODEL_PATH), datasets['test'], device,
         num_workers, test_samples)
-    print('test', test_result)
+    print('[best] test', test_result)
 
-    test_noaug_result, _ = test_with_augmentation(
+    test_noaug_result, preds_noaug = test_with_augmentation(
         torch.load(BEST_MODEL_PATH), datasets['test_no_aug'], device,
         num_workers, 1)
-    print('test (no augmentation)', test_noaug_result)
+    print('[best] test (no augmentation)', test_noaug_result)
 
-    test_144crop_result, _ = test_with_augmentation(
-        torch.load(BEST_MODEL_PATH), datasets['test_144'], device,
+    test_result_last, preds_last = test_with_augmentation(
+        torch.load(LAST_MODEL_PATH), datasets['test'], device,
+        num_workers, test_samples)
+    print('[last] test', test_result_last)
+
+    test_noaug_result_last, preds_noaug_last = test_with_augmentation(
+        torch.load(LAST_MODEL_PATH), datasets['test_no_aug'], device,
         num_workers, 1)
-    print('test (144-crop)', test_144crop_result)
+    print('[last] test (no augmentation)', test_noaug_result_last)
 
+    # Save predictions
+    preds.to_csv(os.path.join(fs_observer.dir, 'test-aug-best.csv'),
+                 index=False, columns=['image', 'label', 'score'])
+    preds_noaug.to_csv(os.path.join(fs_observer.dir, 'test-noaug-best.csv'),
+                 index=False, columns=['image', 'label', 'score'])
+    preds_last.to_csv(os.path.join(fs_observer.dir, 'test-aug-last.csv'),
+                 index=False, columns=['image', 'label', 'score'])
+    preds_noaug_last.to_csv(os.path.join(fs_observer.dir, 'test-noaug-last.csv'),
+                 index=False, columns=['image', 'label', 'score'])
+
+    # TODO: Avoid repetition
     with open(RESULTS_CSV_PATH, 'a') as file:
         file.write(','.join((
-            EXP_NAME, str(EXP_ID), str(best_epoch), str(best_val_auc),
-            str(test_noaug_result['auc']), str(test_result['auc']),
-            str(test_144crop_result['auc']))) + '\n')
+            EXP_NAME,
+            str(EXP_ID),
+            str(best_epoch),
+            str(best_val_auc),
+            str(test_result['auc']),
+            str(test_result_last['auc']),
+            str(test_result['acc']),
+            str(test_result_last['acc']),
+            str(test_result['spec']),
+            str(test_result_last['spec']),
+            str(test_result['sens']),
+            str(test_result_last['sens']),
+            str(test_result['avp']),
+            str(test_result_last['avp']),
+            str(test_noaug_result['auc']),
+            str(test_noaug_result_last['auc']),
+            str(test_noaug_result['acc']),
+            str(test_noaug_result_last['acc']),
+            str(test_noaug_result['spec']),
+            str(test_noaug_result_last['spec']),
+            str(test_noaug_result['sens']),
+            str(test_noaug_result_last['sens']),
+            str(test_noaug_result['avp']),
+            str(test_noaug_result_last['avp']),
+            )) + '\n')
 
     return (test_noaug_result['auc'],
             test_result['auc'],
-            test_144crop_result['auc'])
+            )
