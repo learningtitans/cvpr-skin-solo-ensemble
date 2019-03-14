@@ -122,8 +122,8 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
          test_samples, early_stopping_patience, limit_data, images_per_epoch,
          _run):
     assert(model_name in ('inceptionv4', 'resnet152', 'densenet161',
-                          'senet154', 'pnasnet5large', 'xception',
-                          'squeezenet', 'resnext', 'dpn'))
+                          'senet154', 'pnasnet5large', 'nasnetalarge',
+                          'xception', 'squeezenet', 'resnext', 'dpn'))
 
     cv2.setNumThreads(0)
 
