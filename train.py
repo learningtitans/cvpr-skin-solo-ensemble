@@ -1,6 +1,7 @@
 from itertools import islice
 import os
 
+import cv2
 import pandas as pd
 import pretrainedmodels as ptm
 from sacred import Experiment
@@ -123,6 +124,8 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
     assert(model_name in ('inceptionv4', 'resnet152', 'densenet161',
                           'senet154', 'pnasnet5large', 'xception',
                           'squeezenet', 'resnext', 'dpn'))
+
+    cv2.setNumThreads(0)
 
     AUGMENTED_IMAGES_DIR = os.path.join(fs_observer.dir, 'images')
     CHECKPOINTS_DIR = os.path.join(fs_observer.dir, 'checkpoints')
