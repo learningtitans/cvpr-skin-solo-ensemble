@@ -123,7 +123,8 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
          _run):
     assert(model_name in ('inceptionv4', 'resnet152', 'densenet161',
                           'senet154', 'pnasnet5large', 'nasnetalarge',
-                          'xception', 'squeezenet', 'resnext', 'dpn'))
+                          'xception', 'squeezenet', 'resnext', 'dpn',
+                          'inceptionresnetv2'))
 
     cv2.setNumThreads(0)
 
@@ -198,6 +199,12 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
         aug['std'] = model.std
     elif model_name == 'resnext':
         model = ptm.resnext101_64x4d(num_classes=1000, pretrained='imagenet')
+        model.last_linear = nn.Linear(model.last_linear.in_features, 2)
+        aug['size'] = model.input_size[1]
+        aug['mean'] = model.mean
+        aug['std'] = model.std
+    elif model_name == 'inceptionresnetv2':
+        model = ptm.inceptionresnetv2(num_classes=1000, pretrained='imagenet')
         model.last_linear = nn.Linear(model.last_linear.in_features, 2)
         aug['size'] = model.input_size[1]
         aug['mean'] = model.mean
