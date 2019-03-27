@@ -258,7 +258,7 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.1,
                                                      min_lr=1e-5,
-                                                     patience=10)
+                                                     patience=8)
     metrics = {
         'train': pd.DataFrame(columns=['epoch', 'loss', 'acc', 'auc']),
         'val': pd.DataFrame(columns=['epoch', 'loss', 'acc', 'auc'])
@@ -294,6 +294,7 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
 
         if epoch_val_result['auc'] > best_val_auc:
             best_val_auc = epoch_val_result['auc']
+            best_val_result = epoch_val_result
             best_epoch = epoch
             epochs_without_improvement = 0
             torch.save(model, BEST_MODEL_PATH)
@@ -301,10 +302,12 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
             epochs_without_improvement += 1
 
         if epochs_without_improvement > early_stopping_patience:
+            last_val_result = epoch_val_result
             torch.save(model, LAST_MODEL_PATH)
             break
 
         if epoch == (epochs-1):
+            last_val_result = epoch_val_result
             torch.save(model, LAST_MODEL_PATH)
 
     for phase in ['train', 'val']:
@@ -344,12 +347,25 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
     preds_noaug_last.to_csv(os.path.join(fs_observer.dir, 'test-noaug-last.csv'),
                  index=False, columns=['image', 'label', 'score'])
 
-    # TODO: Avoid repetition
+    # TODO: Avoid repetition.
+    #       use ordereddict, or create a pandas df before saving
     with open(RESULTS_CSV_PATH, 'a') as file:
         file.write(','.join((
             EXP_NAME,
             str(EXP_ID),
             str(best_epoch),
+            str(best_val_result['loss']),
+            str(best_val_result['acc']),
+            str(best_val_result['auc']),
+            str(best_val_result['avp']),
+            str(best_val_result['sens']),
+            str(best_val_result['spec']),
+            str(last_val_result['loss']),
+            str(last_val_result['acc']),
+            str(last_val_result['auc']),
+            str(last_val_result['avp']),
+            str(last_val_result['sens']),
+            str(last_val_result['spec']),
             str(best_val_auc),
             str(test_result['auc']),
             str(test_result_last['auc']),
