@@ -20,6 +20,8 @@ from auglib.augmentation import Augmentations, set_seeds
 from auglib.dataset_loader import CSVDataset, CSVDatasetWithName
 from auglib.meters import AverageMeter
 from auglib.test import test_with_augmentation
+from auglib.models.MobileNetV2 import MobileNetV2
+
 
 ex = Experiment()
 fs_observer = FileStorageObserver.create('results')
@@ -42,7 +44,7 @@ def cfg():
     epochs = 30  # number of epochs
     batch_size = 32  # batch size
     num_workers = 8  # parallel jobs for data loading and augmentation
-    model_name = None  # model: inceptionv4, densenet161, resnet152
+    model_name = None  # model
     val_samples = 16  # number of samples per image in validation
     test_samples = 64  # number of samples per image in test
     early_stopping_patience = 8  # patience for early stopping
@@ -124,7 +126,7 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
     assert(model_name in ('inceptionv4', 'resnet152', 'densenet161',
                           'senet154', 'pnasnet5large', 'nasnetalarge',
                           'xception', 'squeezenet', 'resnext', 'dpn',
-                          'inceptionresnetv2'))
+                          'inceptionresnetv2', 'mobilenetv2'))
 
     cv2.setNumThreads(0)
 
@@ -209,6 +211,16 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
         aug['size'] = model.input_size[1]
         aug['mean'] = model.mean
         aug['std'] = model.std
+    elif model_name == 'mobilenetv2':
+        model = MobileNetV2()
+        model.load_state_dict(torch.load('./auglib/models/mobilenet_v2.pth'))
+        model.classifier = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(model.last_channel, 2),
+        )
+        aug['size'] = 224
+        aug['mean'] = [0.485, 0.456, 0.406]
+        aug['std'] = [0.229, 0.224, 0.225]
     model.to(device)
 
     augs = Augmentations(**aug)
