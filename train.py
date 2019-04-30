@@ -50,6 +50,7 @@ def cfg():
     early_stopping_patience = 8  # patience for early stopping
     images_per_epoch = None  # number of images per epoch
     limit_data = False  # limit dataset to N images
+    split_id = None  # split id (int)
     # augmentations
     aug = {
         'hflip': False,  # Random Horizontal Flip
@@ -122,7 +123,7 @@ def save_images(dataset, to, n=32):
 def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
          epochs, aug, model_name, batch_size, num_workers, val_samples,
          test_samples, early_stopping_patience, limit_data, images_per_epoch,
-         _run):
+         split_id, _run):
     assert(model_name in ('inceptionv4', 'resnet152', 'densenet161',
                           'senet154', 'pnasnet5large', 'nasnetalarge',
                           'xception', 'squeezenet', 'resnext', 'dpn',
@@ -365,6 +366,7 @@ def main(train_root, train_csv, val_root, val_csv, test_root, test_csv,
         file.write(','.join((
             EXP_NAME,
             str(EXP_ID),
+            str(split_id),
             str(best_epoch),
             str(best_val_result['loss']),
             str(best_val_result['acc']),

@@ -94,7 +94,18 @@ Now, run all experiments:
 
 ## Ensembles
 
-The code will be available in the next few weeks.
+```
+python3 create_ensembles.py
+```
+
+This will create three types of ensembles:
+
+1) Average models with same architecture and same split.
+2) Average models with different architectures and same split, at random.
+3) Average models with different architectures and same split, sorted by
+   validation AUC.
+
+The files will be available at `results/ensemble_{1,2,3}.csv`.
 
 
 ## Statistics
